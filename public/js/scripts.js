@@ -44,10 +44,6 @@ document.addEventListener('DOMContentLoaded', function () {
   // Les 2 vignettes en bas à droite (aperçu des slides suivantes)
   let thumbs = hero.querySelectorAll('.hero__thumb');
 
-  // Les flèches < et > en bas au centre
-  let prevBtn = hero.querySelector('.hero__arrow--prev');
-  let nextBtn = hero.querySelector('.hero__arrow--next');
-
   // Le bloc texte (titre + accroche + bouton) et le voile sombre :
   // ils ne s'affichent QUE sur la slide 0 (couple en terrasse).
   // Sur les autres slides, l'image occupe tout l'espace sans texte par-dessus.
@@ -157,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // Lance le défilement automatique : change de slide toutes les 8 secondes
   function startAutoplay() {
     stopAutoplay();                  // on arrête l'ancien timer s'il existe
-    timer = setInterval(next, 7000); // toutes les 8000ms = 8 secondes
+    timer = setInterval(next, 8000); // toutes les 8000ms = 8 secondes
   }
 
   // Arrête le défilement automatique
@@ -191,24 +187,235 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
-  // Clic sur la flèche "précédent" → slide précédente + relancer l'autoplay
-  if (prevBtn) {
-    prevBtn.addEventListener('click', function () {
-      prev();
-      startAutoplay();
-    });
-  }
-
-  // Clic sur la flèche "suivant" → slide suivante + relancer l'autoplay
-  if (nextBtn) {
-    nextBtn.addEventListener('click', function () {
-      next();
-      startAutoplay();
-    });
-  }
-
   // 8. INITIALISATION
   // Au chargement de la page : on affiche la slide 0 et on démarre l'autoplay
   goTo(0);
   startAutoplay();
+});
+
+/* VALIDATION DU FORMULAIRE DE CONTACT (côté client — FE-41, FE-61)
+   Vérifie champs requis, formats (regex) et longueurs AVANT l'envoi,
+   et affiche un message précis près de chaque champ concerné.
+   Ne s'exécute que sur la page contact (sinon le formulaire n'existe pas).
+   Rappel CDC : cette validation améliore l'expérience mais ne remplace
+   jamais celle du serveur (sécurité PHP faite séparément). */
+
+document.addEventListener('DOMContentLoaded', function () {
+
+  const form = document.querySelector('.contact__form');
+  if (!form) return;
+
+  // RÈGLES DE VALIDATION
+  // Les formats ne sont pas imposés par le cahier des charges : ce sont des
+  // choix raisonnables. Les longueurs (message 3–500, sujet ≤120) viennent
+  // du CDC (section 6.1).
+  const rules = {
+    // Nom : lettres (avec accents), espaces, tirets et apostrophes, 2 à 100 caractères.
+    name: {
+      regex: /^[A-Za-zÀ-ÖØ-öø-ÿ'’\- ]{2,100}$/,
+      required: true,
+      messages: {
+        empty: 'Le nom est obligatoire.',
+        invalid: 'Le nom doit contenir 2 à 100 lettres (espaces, tirets et apostrophes autorisés).'
+      }
+    },
+    // Email : format standard adresse@domaine.ext
+    email: {
+      regex: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+      required: true,
+      messages: {
+        empty: "L'adresse email est obligatoire.",
+        invalid: "L'adresse email n'est pas valide."
+      }
+    },
+    // Sujet : facultatif, maximum 120 caractères (CDC section 6.1)
+    subject: {
+      regex: /^.{0,120}$/,
+      required: false,
+      messages: {
+        invalid: 'Le sujet ne doit pas dépasser 120 caractères.'
+      }
+    },
+    // Message : 3 à 500 caractères une fois les espaces superflus retirés (CDC section 6.1)
+    message: {
+      regex: /^[\s\S]{3,500}$/,
+      required: true,
+      messages: {
+        empty: 'Le message est obligatoire.',
+        invalid: 'Le message doit contenir entre 3 et 500 caractères.'
+      }
+    }
+  };
+
+  // Récupère le champ et sa zone d'erreur à partir du nom
+  function getField(name) {
+    return {
+      input: form.querySelector('[name="' + name + '"]'),
+      error: form.querySelector('[data-error-for="' + name + '"]')
+    };
+  }
+
+  // Affiche un message d'erreur sous un champ et le passe en rouge (--error)
+  function showError(name, message) {
+    const { input, error } = getField(name);
+    if (error) error.textContent = message;
+    if (input) {
+      input.classList.add('contact__input--error');
+      input.classList.remove('contact__input--valid');
+    }
+  }
+
+  // Marque un champ comme valide : passe en vert (--valid), efface l'erreur
+  function showValid(name) {
+    const { input, error } = getField(name);
+    if (error) error.textContent = '';
+    if (input) {
+      input.classList.add('contact__input--valid');
+      input.classList.remove('contact__input--error');
+    }
+  }
+
+  // Remet un champ à l'état neutre (ni rouge ni vert) : champ vide facultatif
+  function clearState(name) {
+    const { input, error } = getField(name);
+    if (error) error.textContent = '';
+    if (input) {
+      input.classList.remove('contact__input--error', 'contact__input--valid');
+    }
+  }
+
+  // Valide un champ selon ses règles ; renvoie true si valide
+  function validateField(name) {
+    const rule = rules[name];
+    const { input } = getField(name);
+    if (!rule || !input) return true;
+
+    // on enlève les espaces superflus avant/après (comme le fera le serveur)
+    const value = input.value.trim();
+
+    // champ requis mais vide
+    if (rule.required && value === '') {
+      showError(name, rule.messages.empty);
+      return false;
+    }
+
+    // champ facultatif et vide : état neutre, pas de vert ni de rouge
+    if (!rule.required && value === '') {
+      clearState(name);
+      return true;
+    }
+
+    // test du format via la regex
+    if (!rule.regex.test(value)) {
+      showError(name, rule.messages.invalid);
+      return false;
+    }
+
+    // tout est bon : on passe le champ en vert
+    showValid(name);
+    return true;
+  }
+
+  // Validation en temps réel : pendant la frappe (input) ET quand on quitte le champ (blur)
+  Object.keys(rules).forEach(function (name) {
+    const { input } = getField(name);
+    if (input) {
+      input.addEventListener('input', function () {
+        validateField(name);
+      });
+      input.addEventListener('blur', function () {
+        validateField(name);
+      });
+    }
+  });
+
+  // À l'envoi : on valide tous les champs, on bloque si au moins un est invalide
+  form.addEventListener('submit', function (event) {
+    let allValid = true;
+
+    Object.keys(rules).forEach(function (name) {
+      if (!validateField(name)) {
+        allValid = false;
+      }
+    });
+
+    // si un champ est invalide, on empêche l'envoi et on place le focus sur le 1er champ en erreur
+    if (!allValid) {
+      event.preventDefault();
+      const firstError = form.querySelector('.contact__input--error');
+      if (firstError) firstError.focus();
+    }
+  });
+});
+/* ANIMATION D'APPARITION AU SCROLL — section Top 3 (page d'accueil)
+   Révèle les cartes (fondu + glissement vers le haut) quand elles entrent
+   dans l'écran, via IntersectionObserver. Ne s'exécute que s'il y a des
+   éléments [data-reveal] sur la page (sinon ne fait rien).
+   Le style de départ/arrivée est dans style.css (.is-visible). */
+
+document.addEventListener('DOMContentLoaded', function () {
+
+  const revealItems = document.querySelectorAll('[data-reveal]');
+  if (revealItems.length === 0) return;
+
+  // Si le navigateur ne supporte pas IntersectionObserver : on affiche tout
+  // directement (pas d'animation, mais le contenu reste visible).
+  if (!('IntersectionObserver' in window)) {
+    revealItems.forEach(function (item) {
+      item.classList.add('is-visible');
+    });
+    return;
+  }
+
+  // L'observateur ajoute .is-visible quand l'élément est visible à ~15%,
+  // puis arrête de l'observer (l'animation ne se joue qu'une fois).
+  const observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, {
+    threshold: 0.15
+  });
+
+  revealItems.forEach(function (item) {
+    observer.observe(item);
+  });
+});
+/* NAVBAR TRANSPARENTE QUI SE COLORE AU SCROLL
+   En haut de page, la navbar (.menu) est transparente.
+   Dès qu'on scrolle (plus de 50px), on lui ajoute la classe .menu--scrolled
+   qui lui donne un fond (couleur de la page) via le CSS.
+   Retrait de la classe quand on revient tout en haut. */
+
+document.addEventListener('DOMContentLoaded', function () {
+
+  const navbar = document.querySelector('.menu');
+  if (!navbar) return;
+
+  // seuil de déclenchement en pixels de défilement vertical
+  const scrollThreshold = 50;
+
+  function onScroll() {
+    // on lit le défilement de plusieurs sources pour couvrir tous les cas
+    // (certaines pages défilent via window, d'autres via l'élément racine)
+    const scrolled = window.scrollY
+      || window.pageYOffset
+      || document.documentElement.scrollTop
+      || document.body.scrollTop
+      || 0;
+
+    if (scrolled > scrollThreshold) {
+      navbar.classList.add('menu--scrolled');
+    } else {
+      navbar.classList.remove('menu--scrolled');
+    }
+  }
+
+  // on vérifie l'état au chargement (si la page est déjà défilée) puis à chaque scroll.
+  // { passive: true } : meilleure performance au défilement.
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
 });

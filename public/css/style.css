@@ -70,13 +70,23 @@
 }
 
 /* L'image à l'intérieur de chaque slide remplit tout l'espace
-   sans déformation grâce à object-fit: cover (elle est recadrée si besoin) */
+   sans déformation grâce à object-fit: cover (elle est recadrée si besoin). */
 #hero .hero__slide img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center;
     display: block;
-    /* supprime l'espace fantôme sous les images inline */
+}
+
+/* Image de la PREMIÈRE slide uniquement (le couple en terrasse) :
+   scale(1.15) agrandit l'image de 15%, translateX(-8%) la décale vers
+   la gauche et translateY(-8%) la remonte. Ça pousse le couple vers la
+   gauche et le haut pour qu'il ne soit pas caché par le texte à droite.
+   Les autres slides gardent le cadrage centré par défaut ci-dessus. */
+#hero .hero__slide:first-child img {
+    object-position: left center;
+    transform: scale(1.25) translateX(-8%) translateY(-8%);
 }
 
 /* VOILE SOMBRE (OVERLAY)
@@ -204,7 +214,8 @@
 /* Au survol : fond doré, texte foncé */
 #hero .hero__cta:hover {
     background: var(--hero-gold);
-    border-color: var(--hero-gold);
+    outline: 3px solid var(--hero-gold);
+    outline-offset: -3px;
     color: #111;
 }
 
@@ -242,7 +253,8 @@
 /* Dot actif : rempli et bordé en doré */
 #hero .hero__dot.is-active {
     background: var(--hero-gold);
-    border-color: var(--hero-gold);
+    outline: 3px solid var(--hero-gold);
+    outline-offset: -3px;
 }
 
 /* VIGNETTES (en bas à droite)
@@ -277,31 +289,39 @@
 /* Style commun aux 2 vignettes */
 #hero .hero__thumb {
     padding: 0;
-    border: 3px solid transparent;
-    /* bordure invisible par défaut */
+    margin: 0;
+    border: none;
     border-radius: .35rem;
-    /* coins légèrement arrondis */
     overflow: hidden;
-    /* l'image est recadrée dans le cadre */
     cursor: pointer;
-    background: none;
-    transition: border-color .2s ease;
+    background: #000;
+    position: relative;
+    display: block;
+    transition: box-shadow .2s ease;
 }
 
 /* La vignette active a une bordure dorée */
-#hero .hero__thumb.is-active {
-    border-color: var(--hero-gold);
+#hero .hero__thumb.is-active::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 3px solid var(--hero-gold);
+    border-radius: .35rem;
+    pointer-events: none;
+    z-index: 2;
 }
 
 /* Image à l'intérieur des vignettes.
    La transition d'opacité crée un fondu quand l'image change :
    le JS passe l'opacité à 0, change le src, puis repasse à 1. */
 #hero .hero__thumb img {
-    display: block;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
-    /* recadrée sans déformation */
+    display: block;
     transition: opacity .3s ease;
-    /* fondu de 0.3 secondes */
 }
 
 /* Grande vignette (1re)
@@ -311,60 +331,12 @@
     height: clamp(10rem, 16vw, 17rem);
 }
 
-#hero .hero__thumb--lg img {
-    width: 100%;
-    height: 100%;
-}
-
 /* Petite vignette (2e)
    Plus petite, partiellement coupée par le bord droit grâce au
    overflow: hidden du conteneur #hero */
 #hero .hero__thumb--sm {
     width: clamp(5rem, 8vw, 9rem);
     height: clamp(7rem, 11vw, 13rem);
-}
-
-#hero .hero__thumb--sm img {
-    width: 100%;
-    height: 100%;
-}
-
-/* FLÈCHES < > (centrées en bas de la section)
-   Deux petits boutons carrés avec une bordure fine, centrés
-   horizontalement grâce à left: 50% + translateX(-50%). */
-#hero .hero__arrows {
-    position: absolute;
-    bottom: .75rem;
-    left: 50%;
-    transform: translateX(-50%);
-    /* centrage horizontal */
-    z-index: 3;
-    display: flex;
-    gap: .15rem;
-    /* petit espace entre les 2 flèches */
-}
-
-/* Chaque flèche : carré, bordure fine, fond transparent */
-#hero .hero__arrow {
-    width: 1.75rem;
-    height: 1.75rem;
-    border: 1px solid rgba(255, 255, 255, .3);
-    border-radius: 0;
-    /* coins carrés (pas arrondis) */
-    background: transparent;
-    color: rgba(255, 255, 255, .6);
-    font-size: .85rem;
-    line-height: 1;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background .2s ease;
-}
-
-/* Au survol : léger fond blanc */
-#hero .hero__arrow:hover {
-    background: rgba(255, 255, 255, .1);
 }
 
 /* RESPONSIVE — MOBILE (moins de 768px)
@@ -411,7 +383,14 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
+        object-position: center;
         display: block;
+    }
+
+    /* Première slide uniquement (couple) : décalée vers la gauche et le haut */
+    #hero .hero__slide:first-child img {
+        object-position: left center;
+        transform: scale(1.25) translateX(-8%) translateY(-8%);
     }
 
     /* Voile sombre : uniforme au lieu du dégradé gauche-droite,
@@ -487,7 +466,8 @@
 
     #hero .hero__cta:hover {
         background: var(--hero-gold);
-        border-color: var(--hero-gold);
+        outline: 3px solid var(--hero-gold);
+        outline-offset: -3px;
         color: #111;
     }
 
@@ -517,7 +497,8 @@
 
     #hero .hero__dot.is-active {
         background: var(--hero-gold);
-        border-color: var(--hero-gold);
+        outline: 3px solid var(--hero-gold);
+        outline-offset: -3px;
     }
 
     /* Vignettes : affichées en bas à droite, plus petites qu'en desktop */
@@ -534,21 +515,34 @@
 
     #hero .hero__thumb {
         padding: 0;
-        border: 2px solid transparent;
-        border-radius: .25rem;
+        margin: 0;
+        border: none;
+        border-radius: .35rem;
         overflow: hidden;
         cursor: pointer;
-        background: none;
-        transition: border-color .2s ease;
+        background: #000;
+        position: relative;
+        display: block;
+        transition: box-shadow .2s ease;
     }
 
-    #hero .hero__thumb.is-active {
-        border-color: var(--hero-gold);
+    #hero .hero__thumb.is-active::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border: 3px solid var(--hero-gold);
+        border-radius: .25rem;
+        pointer-events: none;
+        z-index: 2;
     }
 
     #hero .hero__thumb img {
-        display: block;
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
         object-fit: cover;
+        display: block;
         transition: opacity .3s ease;
     }
 
@@ -558,51 +552,10 @@
         height: 7rem;
     }
 
-    #hero .hero__thumb--lg img {
-        width: 100%;
-        height: 100%;
-    }
-
     /* Petite vignette : taille mobile */
     #hero .hero__thumb--sm {
         width: 4rem;
         height: 5.5rem;
-    }
-
-    #hero .hero__thumb--sm img {
-        width: 100%;
-        height: 100%;
-    }
-
-    /* Flèches : centrées en bas, plus petites */
-    #hero .hero__arrows {
-        position: absolute;
-        bottom: 1.25rem;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 3;
-        display: flex;
-        gap: .15rem;
-    }
-
-    #hero .hero__arrow {
-        width: 1.5rem;
-        height: 1.5rem;
-        border: 1px solid rgba(255, 255, 255, .3);
-        border-radius: 0;
-        background: transparent;
-        color: rgba(255, 255, 255, .6);
-        font-size: .75rem;
-        line-height: 1;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: background .2s ease;
-    }
-
-    #hero .hero__arrow:hover {
-        background: rgba(255, 255, 255, .1);
     }
 }
 
@@ -648,7 +601,14 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
+        object-position: center;
         display: block;
+    }
+
+    /* Première slide uniquement (couple) : décalée vers la gauche et le haut */
+    #hero .hero__slide:first-child img {
+        object-position: left center;
+        transform: scale(1.25) translateX(-8%) translateY(-8%);
     }
 
     /* Voile sombre : même dégradé qu'en desktop */
@@ -721,7 +681,8 @@
 
     #hero .hero__cta:hover {
         background: var(--hero-gold);
-        border-color: var(--hero-gold);
+        outline: 3px solid var(--hero-gold);
+        outline-offset: -3px;
         color: #111;
     }
 
@@ -750,7 +711,8 @@
 
     #hero .hero__dot.is-active {
         background: var(--hero-gold);
-        border-color: var(--hero-gold);
+        outline: 3px solid var(--hero-gold);
+        outline-offset: -3px;
     }
 
     /* Vignettes : affichées, un peu plus petites et plus basses */
@@ -767,21 +729,34 @@
 
     #hero .hero__thumb {
         padding: 0;
-        border: 3px solid transparent;
+        margin: 0;
+        border: none;
         border-radius: .35rem;
         overflow: hidden;
         cursor: pointer;
-        background: none;
-        transition: border-color .2s ease;
+        background: #000;
+        position: relative;
+        display: block;
+        transition: box-shadow .2s ease;
     }
 
-    #hero .hero__thumb.is-active {
-        border-color: var(--hero-gold);
+    #hero .hero__thumb.is-active::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border: 3px solid var(--hero-gold);
+        border-radius: .35rem;
+        pointer-events: none;
+        z-index: 2;
     }
 
     #hero .hero__thumb img {
-        display: block;
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
         object-fit: cover;
+        display: block;
         transition: opacity .3s ease;
     }
 
@@ -789,11 +764,6 @@
     #hero .hero__thumb--lg {
         width: clamp(7rem, 10vw, 10rem);
         height: clamp(9rem, 13vw, 13rem);
-    }
-
-    #hero .hero__thumb--lg img {
-        width: 100%;
-        height: 100%;
     }
 
     /* Petite vignette : taille tablette */
@@ -836,5 +806,991 @@
 
     #hero .hero__arrow:hover {
         background: rgba(255, 255, 255, .1);
+    }
+}
+
+/* STYLES DE LA PAGE À PROPOS — Maison Rosalie
+   Même principe que le héro : tous les sélecteurs sont préfixés par #about
+   pour ne pas entrer en conflit avec les autres pages.
+   Convention de nommage : BEM (.about__title, .about__title--small, ...) */
+:root {
+    --about-bg: #faf7f1;
+    /* crème très clair du fond */
+    --about-text: #2b1a14;
+    /* brun très foncé, bien lisible sur le crème (FE-01) */
+    --about-gold: #b8862b;
+    /* doré plus soutenu que --hero-gold : reste visible sur fond clair */
+}
+
+/* CONTENEUR DE LA PAGE
+   Fond crème avec un léger motif de petits points (dégradé radial répété). */
+#about {
+    background-color: #FBF5E6;
+    color: var(--about-text);
+    font-family: 'Playfair Display', Georgia, serif;
+    padding: 5rem 1rem 4rem;
+}
+
+/* TITRES ("À propos" et "Notre Histoire") */
+#about .about__title {
+    position: relative;
+    display: inline-block;
+    /* la largeur suit le texte : le losange se colle juste à côté */
+    margin: 0;
+    font-size: clamp(2rem, 5vw, 2.75rem);
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+/* variante plus petite pour les sous-titres */
+#about .about__title--small {
+    font-size: clamp(1.4rem, 3vw, 1.6rem);
+}
+
+/* Petit losange doré à gauche ou à droite du titre :
+   un carré tourné de 45°, placé en dehors du texte */
+#about .about__title--diamond-left::before,
+#about .about__title--diamond-right::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: .4rem;
+    height: .4rem;
+    background: var(--about-gold);
+    transform: translateY(-50%) rotate(45deg);
+}
+
+#about .about__title--diamond-left::before {
+    left: -1rem;
+}
+
+#about .about__title--diamond-right::after {
+    right: -1rem;
+}
+
+/* Trait doré sous les titres */
+#about .about__divider {
+    display: block;
+    width: 2.25rem;
+    height: 2px;
+    margin: .5rem auto 1.25rem;
+    /* centré sous le titre */
+    background: var(--about-gold);
+}
+
+/* 1. INTRODUCTION : tout centré, paragraphe limité en largeur pour la lecture */
+#about .about__intro {
+    max-width: 60rem;
+    margin: 0 auto 3rem;
+    text-align: center;
+}
+
+#about .about__lead {
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* 2. NOTRE HISTOIRE
+   Mobile : photo puis texte, l'un sous l'autre.
+   À partir de 768px : 2 colonnes, centrées verticalement l'une par rapport à l'autre. */
+#about .about__story {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2.5rem;
+    max-width: 84rem;
+    margin: 0 auto;
+    justify-content: center;
+}
+
+@media (min-width: 768px) {
+    #about .about__story {
+        flex-direction: row;
+        gap: 3.5rem;
+    }
+}
+
+/* Photo de la boutique : coins légèrement arrondis, fine ombre */
+#about .about__media {
+    flex: 1 1 50%;
+    width: 100%;
+    max-width: 28rem;
+    margin: 0;
+}
+
+#about .about__media img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    /* cadre carré comme sur la maquette : la photo est recadrée sans être déformée */
+    object-fit: cover;
+    border-radius: .4rem;
+    box-shadow: 0 6px 18px rgba(43, 26, 20, .18);
+}
+
+/* Colonne texte : centrée comme sur la maquette */
+#about .about__text {
+    flex: 1 1 50%;
+    max-width: 26rem;
+    text-align: center;
+    line-height: 1.55;
+}
+
+#about .about__text p {
+    margin: 0 0 1.25rem;
+}
+
+#about .about__text p:last-child {
+    margin-bottom: 0;
+}
+
+/* SECTIONS SUIVANTES (valeurs, chiffres, frise)
+   Chaque section est séparée de la précédente par un grand espace. */
+#about .about__section {
+    max-width: 60rem;
+    margin: 5rem auto 0;
+}
+
+/* titre de section centré, avec son trait doré */
+#about .about__heading {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+/* 3. NOS VALEURS : grille de cartes */
+#about .about__values {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+@media (min-width: 576px) {
+    #about .about__values {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 992px) {
+    #about .about__values {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* carte : fond blanc cassé, filet doré en haut */
+#about .about__value {
+    padding: 1.5rem 1.25rem;
+    border-top: 3px solid var(--about-gold);
+    border-radius: .4rem;
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(43, 26, 20, .08);
+    text-align: center;
+}
+
+#about .about__value h3 {
+    margin: 0 0 .75rem;
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+#about .about__value p {
+    margin: 0;
+    font-size: .95rem;
+    line-height: 1.55;
+}
+
+/* 4. CHIFFRES CLÉS : 2 colonnes sur mobile, 4 sur ordinateur */
+#about .about__stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    text-align: center;
+}
+
+@media (min-width: 768px) {
+    #about .about__stats {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* grand chiffre doré au-dessus de son libellé */
+#about .about__stat-number {
+    display: block;
+    color: var(--about-gold);
+    font-size: clamp(2.25rem, 6vw, 3rem);
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    /* chiffres de même largeur : le nombre ne "tremble" pas pendant l'animation */
+}
+
+#about .about__stat-label {
+    display: block;
+    margin-top: .5rem;
+    font-size: .95rem;
+}
+
+/* 5. FRISE CHRONOLOGIQUE
+   Un trait vertical doré à gauche (bordure de la liste),
+   et un losange doré sur le trait pour chaque date. */
+#about .about__timeline {
+    position: relative;
+    max-width: 40rem;
+    margin: 0 auto;
+    padding: 0 0 0 2rem;
+    border-left: 2px solid var(--about-gold);
+    list-style: none;
+}
+
+#about .about__event {
+    position: relative;
+    padding-bottom: 2rem;
+}
+
+#about .about__event:last-child {
+    padding-bottom: 0;
+}
+
+/* losange posé sur le trait, au niveau de l'année */
+#about .about__event::before {
+    content: "";
+    position: absolute;
+    top: .45rem;
+    left: calc(-2rem - 1px);
+    /* recule jusqu'au trait : padding de la liste + moitié de l'épaisseur du trait */
+    width: .7rem;
+    height: .7rem;
+    background: var(--about-gold);
+    transform: translateX(-50%) rotate(45deg);
+}
+
+#about .about__event-year {
+    display: block;
+    margin-bottom: .25rem;
+    color: var(--about-gold);
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+#about .about__event p {
+    margin: 0;
+    line-height: 1.55;
+}
+
+/* modification du style des liens de la nav bare */
+.menu {
+    color: #D4A373;
+    /* transparente en haut de page */
+    background-color: transparent;
+    font-weight: bold;
+    /* transition douce quand le fond apparaît/disparaît au scroll */
+    transition: background-color .3s ease, box-shadow .3s ease, backdrop-filter .3s ease;
+}
+
+/* Au scroll (classe ajoutée par scripts.js) : la navbar prend la couleur de la page.
+   La couleur est une variable (--nav-scrolled-bg) que chaque page peut redéfinir
+   pour coller à son propre fond. Valeur par défaut : crème du site. */
+:root {
+    --nav-scrolled-bg: #FBF5E6;
+}
+
+.menu--scrolled {
+    background-color: var(--nav-scrolled-bg);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, .08);
+}
+
+/* Accueil : le contenu sous le hero (top 3) a un fond chocolat foncé,
+   donc la navbar colorée doit être foncée elle aussi, pas crème. */
+body:has(#top-recipes) {
+    --nav-scrolled-bg: #180E09;
+}
+
+/* Page recettes : on ne peut pas modifier son fichier, donc on la reconnaît
+   par sa structure — une <section class="bg-surface"> placée juste après la
+   navbar. Son fond est "surface" (#fcf9f4) → la navbar prend cette teinte au scroll. */
+body:has(> .menu + section.bg-surface) {
+    --nav-scrolled-bg: #fcf9f4;
+}
+
+#connexion {
+    background-color: #FAEDCD;
+    border-radius: 15px;
+    color: black;
+    cursor: pointer;
+}
+
+/* PAGE CONTACT — Maison Rosalie
+   Styles de la page contact (contact.php).
+   Scopés sous #contact pour ne pas toucher aux autres pages.
+   Couleurs de la marque en variables :
+     --contact-gold  = doré des accents (bouton, icônes)
+     --contact-text  = brun foncé du texte
+     --contact-field = fond gris clair des champs du formulaire
+     --contact-muted = gris des valeurs secondaires */
+.div-contact {
+    background-color: #FBF5E6;
+}
+
+#contact {
+    --contact-gold: #b8862b;
+    --contact-text: #2b1a14;
+    --contact-field: #f3f1ee;
+    --contact-muted: #8a827a;
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 5rem 1.5rem 3.5rem;
+    color: var(--contact-text);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* 1. EN-TÊTE : titre centré + logo à droite */
+#contact .contact__header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 3rem;
+}
+
+#contact .contact__title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 500;
+    font-size: 2.75rem;
+    letter-spacing: .01em;
+    color: #70493A;
+    margin: 0;
+}
+
+/* Logo positionné en haut à droite de l'en-tête */
+#contact .contact__logo {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    height: 4.5rem;
+    width: auto;
+}
+
+/* 2. CARTE + FORMULAIRE côte à côte */
+#contact .contact__main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: stretch;
+    margin-bottom: 3.5rem;
+    min-height: 28rem;
+}
+
+/* Carte : hauteur fixe (requise par Leaflet pour bien positionner les tuiles),
+   coins arrondis, bordure de la couleur de la marque, légère ombre.
+   position + isolation + z-index : créent un "contexte d'empilement" isolé
+   qui enferme les z-index internes élevés de Leaflet (tuiles, contrôles,
+   popups montent jusqu'à 1000). Sans ça, ils passent par-dessus la navbar
+   qui n'a pas de z-index. Ici tout Leaflet reste confiné dans la carte. */
+#contact .contact__map {
+    position: relative;
+    z-index: 0;
+    isolation: isolate;
+    border-radius: .75rem;
+    overflow: hidden;
+    height: 100%;
+    min-height: 28rem;
+    border: 2px solid #70493A;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, .08);
+}
+
+/* Le conteneur interne de Leaflet doit remplir toute la hauteur de la carte */
+#contact .contact__map .leaflet-container {
+    height: 100%;
+    width: 100%;
+    border-radius: .5rem;
+}
+
+/* Sécurité supplémentaire : on borne les z-index des panneaux et contrôles
+   Leaflet pour qu'ils restent bas, à l'intérieur du cadre de la carte. */
+#contact .contact__map .leaflet-pane,
+#contact .contact__map .leaflet-top,
+#contact .contact__map .leaflet-bottom {
+    z-index: 1;
+}
+
+#contact .contact__map img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Formulaire : colonne de champs empilés, centrés verticalement */
+#contact .contact__form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1.5rem;
+}
+
+/* Champs de saisie : fond gris clair, arrondis, sans bordure visible */
+#contact .contact__input {
+    width: 100%;
+    border: 1px solid transparent;
+    border-radius: .75rem;
+    background: var(--contact-field);
+    padding: 1.1rem 1.35rem;
+    font-size: 1rem;
+    color: var(--contact-text);
+    font-family: inherit;
+    transition: border-color .2s ease, background .2s ease;
+    border: 2px solid #70493A;
+}
+
+#contact .contact__input::placeholder {
+    color: var(--contact-muted);
+}
+
+/* Le champ message est plus haut et redimensionnable verticalement */
+#contact .contact__textarea {
+    resize: vertical;
+    min-height: 9rem;
+    line-height: 1.5;
+}
+
+/* Focus : bordure dorée nette pour l'accessibilité */
+#contact .contact__input:focus {
+    outline: none;
+    border-color: var(--contact-gold);
+    background: #fff;
+}
+
+/* Bouton "Envoyer" : fond doré, texte foncé, pleine largeur */
+#contact .contact__submit {
+    border: none;
+    border-radius: .75rem;
+    background: var(--contact-gold);
+    color: #fff;
+    padding: 1.1rem;
+    font-size: 1.15rem;
+    font-weight: 600;
+    letter-spacing: .02em;
+    cursor: pointer;
+    transition: background .2s ease, transform .1s ease;
+}
+
+#contact .contact__submit:hover {
+    background: #a0751f;
+}
+
+#contact .contact__submit:active {
+    transform: translateY(1px);
+}
+
+/* 3. INFOS DE CONTACT : 3 blocs en bas */
+#contact .contact__infos {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 3.5rem;
+    padding-top: 1rem;
+}
+
+/* Chaque info : icône + texte alignés horizontalement */
+#contact .contact__info {
+    display: flex;
+    align-items: center;
+    gap: .85rem;
+}
+
+/* Icône dorée */
+#contact .contact__info-icon {
+    width: 2rem;
+    height: 2rem;
+    color: var(--contact-gold);
+    flex-shrink: 0;
+}
+
+/* Texte de l'info : label en gras au-dessus de la valeur */
+#contact .contact__info-text {
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+}
+
+#contact .contact__info-label {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--contact-text);
+}
+
+#contact .contact__info-value {
+    font-size: .9rem;
+    color: var(--contact-muted);
+}
+
+/* PAGE CONTACT — RESPONSIVE (moins de 768px) */
+@media (max-width: 767px) {
+
+    /* En-tête : logo au-dessus du titre, tout centré */
+    #contact .contact__header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    #contact .contact__logo {
+        position: static;
+        transform: none;
+        height: 4rem;
+    }
+
+    #contact .contact__title {
+        font-size: 2rem;
+    }
+
+    /* Carte au-dessus du formulaire */
+    #contact .contact__main {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    /* Infos empilées verticalement, alignées à gauche */
+    #contact .contact__infos {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.75rem;
+    }
+}
+
+/* PAGE CONTACT — messages de validation du formulaire */
+
+/* Alerte globale (succès ou erreur) affichée en haut du formulaire */
+#contact .contact__alert {
+    margin: 0;
+    padding: .85rem 1.1rem;
+    border-radius: .5rem;
+    font-size: .95rem;
+}
+
+/* Succès : vert doux */
+#contact .contact__alert--success {
+    background: #e4f1e4;
+    color: #2e6b2e;
+}
+
+/* Erreur globale : rouge doux */
+#contact .contact__alert--error {
+    background: #f6e2e2;
+    color: #9b2c2c;
+}
+
+/* Chaque champ (input + message d'erreur) empilés verticalement */
+#contact .contact__field {
+    display: flex;
+    flex-direction: column;
+    gap: .35rem;
+}
+
+/* Message d'erreur sous un champ : rouge, petit. Vide par défaut (rempli par le JS). */
+#contact .contact__error {
+    color: #9b2c2c;
+    font-size: .85rem;
+    min-height: 1rem;
+}
+
+/* Champ en erreur : bordure rouge pour le repérer visuellement */
+#contact .contact__input--error {
+    border-color: #9b2c2c;
+    background: #fdf5f5;
+}
+
+/* Champ valide : bordure verte pour confirmer que la saisie est correcte */
+#contact .contact__input--valid {
+    border-color: #2e7d32;
+    background: #f4faf4;
+}
+
+/* PAGE 404 — Maison Rosalie
+   Page "introuvable", dans l'identité de la marque (crème, doré, brun).
+   Scopée sous #error404 pour ne pas toucher aux autres pages. */
+
+/* Fond crème pleine largeur, comme la page contact */
+.div-error {
+    background-color: #FBF5E6;
+}
+
+/* Conteneur centré, verticalement et horizontalement */
+#error404 {
+    --err-gold: #b8862b;
+    --err-text: #2b1a14;
+    --err-title: #70493A;
+    max-width: 42rem;
+    margin: 0 auto;
+    padding: 5rem 1.5rem 6rem;
+    text-align: center;
+    color: var(--err-text);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+/* Grand "404" en doré, police serif de la marque */
+#error404 .error404__code {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(5rem, 18vw, 10rem);
+    font-weight: 500;
+    line-height: 1;
+    color: var(--err-gold);
+    margin: 0;
+}
+
+/* Logo sous le code */
+#error404 .error404__logo {
+    height: 4.5rem;
+    width: auto;
+}
+
+/* Titre brun */
+#error404 .error404__title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 500;
+    font-size: clamp(1.5rem, 4vw, 2.25rem);
+    color: var(--err-title);
+    margin: 0;
+}
+
+/* Texte d'explication */
+#error404 .error404__text {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--err-text);
+    max-width: 32rem;
+    margin: 0;
+}
+
+/* Zone des boutons */
+#error404 .error404__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+/* Style commun des boutons : forme pilule, padding généreux */
+#error404 .error404__btn {
+    display: inline-block;
+    text-decoration: none;
+    padding: .85rem 2rem;
+    border-radius: 999px;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+
+/* Bouton principal : fond doré, texte crème */
+#error404 .error404__btn--primary {
+    background: var(--err-gold);
+    color: #fff;
+    border: 2px solid var(--err-gold);
+}
+
+#error404 .error404__btn--primary:hover {
+    background: #a0751f;
+    border-color: #a0751f;
+}
+
+/* Bouton secondaire : contour doré, fond transparent */
+#error404 .error404__btn--ghost {
+    background: transparent;
+    color: var(--err-gold);
+    border: 2px solid var(--err-gold);
+}
+
+#error404 .error404__btn--ghost:hover {
+    background: var(--err-gold);
+    color: #fff;
+}
+
+/* Responsive : boutons empilés sur petit écran */
+@media (max-width: 480px) {
+    #error404 .error404__actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    #error404 .error404__btn {
+        width: 100%;
+    }
+}
+
+/* TOP 3 DES RECETTES — page d'accueil (FE-11)
+   Bloc "luxe chocolatier" : fond sombre, doré, cartes cacao.
+   Scopé sous #top-recipes (PAS #recettes, déjà utilisé par recipe.php).
+   L'animation d'apparition au scroll est gérée dans scripts.js
+   (classe .is-visible ajoutée aux éléments [data-reveal]). */
+#top-recipes {
+    --tr-gold: #D4AF37;
+    --tr-gold-light: #E2C992;
+    --tr-cream: #FBF5EC;
+    --tr-text: #E7DEC8;
+    --tr-card: #27170F;
+    --tr-card-border: rgba(82, 51, 33, .6);
+    background: linear-gradient(to bottom, #180E09, #21130D 55%, #1E120C);
+    color: var(--tr-text);
+    padding: 6rem 1.5rem;
+    font-family: 'Montserrat', 'Segoe UI', Tahoma, sans-serif;
+}
+
+#top-recipes .top-recipes__inner {
+    max-width: 72rem;
+    margin: 0 auto;
+}
+
+/* En-tête de section */
+#top-recipes .top-recipes__heading {
+    text-align: center;
+    max-width: 42rem;
+    margin: 0 auto 4rem;
+}
+
+#top-recipes .top-recipes__eyebrow {
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: .25em;
+    font-size: .75rem;
+    font-weight: 600;
+    color: var(--tr-gold);
+    margin-bottom: .75rem;
+}
+
+#top-recipes .top-recipes__title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 400;
+    font-size: clamp(2rem, 5vw, 3rem);
+    color: var(--tr-cream);
+    letter-spacing: .02em;
+    margin: 0 0 1rem;
+}
+
+/* Ornement : deux traits dorés + une icône */
+#top-recipes .top-recipes__ornament {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .75rem;
+    margin-bottom: 1rem;
+}
+
+#top-recipes .top-recipes__ornament-line {
+    width: 3rem;
+    height: 1px;
+    background: rgba(212, 175, 55, .5);
+}
+
+#top-recipes .top-recipes__ornament i {
+    color: var(--tr-gold);
+    font-size: .75rem;
+}
+
+#top-recipes .top-recipes__subtitle {
+    font-size: 1.05rem;
+    font-weight: 300;
+    color: rgba(231, 222, 200, .8);
+    margin: 0;
+}
+
+/* État "aucune recette" (FE-12) */
+#top-recipes .top-recipes__empty {
+    text-align: center;
+    color: rgba(231, 222, 200, .7);
+    max-width: 32rem;
+    margin: 0 auto;
+}
+
+/* Grille : 3 colonnes ordinateur, 1 colonne mobile (FE-11) */
+#top-recipes .top-recipes__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+}
+
+@media (max-width: 1024px) {
+    #top-recipes .top-recipes__grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    #top-recipes .top-recipes__grid {
+        grid-template-columns: 1fr;
+        max-width: 26rem;
+        margin: 0 auto;
+    }
+}
+
+/* Carte de recette */
+#top-recipes .recipe-card {
+    background: var(--tr-card);
+    border: 1px solid var(--tr-card-border);
+    border-radius: 1rem;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, .35);
+    transition: transform .3s ease, border-color .3s ease;
+}
+
+#top-recipes .recipe-card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(212, 175, 55, .7);
+}
+
+/* Visuel */
+#top-recipes .recipe-card__media {
+    position: relative;
+    height: 16rem;
+    overflow: hidden;
+    background: #1E120C;
+}
+
+#top-recipes .recipe-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform .5s ease;
+}
+
+#top-recipes .recipe-card:hover .recipe-card__image {
+    transform: scale(1.05);
+}
+
+/* Voile dégradé en bas de l'image */
+#top-recipes .recipe-card__media::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, var(--tr-card), transparent 55%);
+    opacity: .8;
+    pointer-events: none;
+}
+
+/* Badge de rang (haut gauche) */
+#top-recipes .recipe-card__badge {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1;
+    background: rgba(22, 13, 8, .85);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(212, 175, 55, .5);
+    color: var(--tr-gold-light);
+    font-size: .75rem;
+    font-weight: 500;
+    letter-spacing: .03em;
+    padding: .3rem .85rem;
+    border-radius: 999px;
+}
+
+/* Corps de la carte */
+#top-recipes .recipe-card__body {
+    padding: 1.6rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex: 1;
+}
+
+/* Temps + difficulté (doré, majuscules) */
+#top-recipes .recipe-card__meta {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    font-size: .72rem;
+    font-weight: 500;
+    color: var(--tr-gold);
+    margin: 0 0 .75rem;
+}
+
+#top-recipes .recipe-card__title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 400;
+    font-size: 1.5rem;
+    color: var(--tr-cream);
+    margin: 0 0 .75rem;
+    transition: color .3s ease;
+}
+
+#top-recipes .recipe-card:hover .recipe-card__title {
+    color: var(--tr-gold-light);
+}
+
+#top-recipes .recipe-card__desc {
+    font-size: .9rem;
+    font-weight: 300;
+    line-height: 1.65;
+    color: rgba(231, 222, 200, .75);
+    margin: 0;
+}
+
+/* Bouton "Voir la recette" : pilule contour doré, se remplit au survol */
+#top-recipes .recipe-card__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: .7rem 1.25rem;
+    border: 1px solid rgba(212, 175, 55, .6);
+    border-radius: 999px;
+    color: var(--tr-cream);
+    text-decoration: none;
+    font-size: .78rem;
+    font-weight: 500;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    transition: background .3s ease, color .3s ease;
+}
+
+#top-recipes .recipe-card__btn:hover {
+    background: var(--tr-gold);
+    color: #180E09;
+}
+
+/* Animation d'apparition au scroll (pilotée par scripts.js) */
+#top-recipes [data-reveal] {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity .6s ease, transform .6s ease;
+}
+
+#top-recipes [data-reveal].is-visible {
+    opacity: 1;
+    transform: none;
+}
+
+/* Léger décalage entre les cartes pour un effet en cascade */
+#top-recipes [data-reveal]:nth-child(2) {
+    transition-delay: .12s;
+}
+
+#top-recipes [data-reveal]:nth-child(3) {
+    transition-delay: .24s;
+}
+
+/* Accessibilité : pas d'animation si l'utilisateur la refuse */
+@media (prefers-reduced-motion: reduce) {
+    #top-recipes [data-reveal] {
+        opacity: 1;
+        transform: none;
+        transition: none;
     }
 }

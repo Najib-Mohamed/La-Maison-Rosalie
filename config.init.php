@@ -21,6 +21,7 @@ const BASE_URL = __DIR__;
 const VALID_PAGES = [
     'home',
     'about',
-    'recipe',
+    'recettes',
+    "recipe",
     'contact',
 ];
